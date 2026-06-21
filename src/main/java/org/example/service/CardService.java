@@ -1,0 +1,149 @@
+package org.example.service;
+
+import org.example.dto.CardDTO;
+import org.example.dto.TerminalDTO;
+import org.example.enums.GeneralStatus;
+import org.example.repository.CardRepository;
+import org.example.repository.TerminalRepository;
+import org.example.util.CardUtil;
+import org.example.util.DateUtil;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.List;
+
+@Service
+public class CardService {
+    @Autowired
+    private CardRepository cardRepository;
+    @Autowired
+    private TerminalRepository terminalRepository;
+
+    public void createCard(String cardNumber, String expiredDate) {
+        if (!isValidCardNumber(cardNumber)) {
+            System.out.println("invalid card number");
+            return;
+        }
+
+        LocalDate expDate = getCardExpDate(expiredDate);
+        if (expDate == null) {
+            System.out.println("invalid expired date");
+            return;
+        }
+
+        CardDTO exist = cardRepository.getCardByNumber(cardNumber);
+        if (exist != null) {
+            System.out.println("Card number is exist");
+            return;
+        }
+
+        CardDTO cardDTO = new CardDTO();
+        cardDTO.setCardNumber(cardNumber);
+        cardDTO.setExpDate(expDate);
+        cardDTO.setBalance(0d);
+        cardDTO.setStatus(GeneralStatus.ACTIVE);
+        cardDTO.setCreatedDate(LocalDateTime.now());
+
+        if (cardRepository.save(cardDTO) == 1) {
+            System.out.println("card successfully created");
+        } else {
+            System.out.println("error");
+        }
+    }
+
+    private boolean isValidCardNumber(String cardNumber) {
+        if (cardNumber == null || cardNumber.isBlank() || cardNumber.length() != 16) {
+            return false;
+        }
+        for (int i = 0; i < cardNumber.length(); i++) {
+            if (Character.isDigit(cardNumber.charAt(i)))
+                return false;
+        }
+        return true;
+    }
+
+    public void cardList() {
+        List<CardDTO> list = cardRepository.getList();
+        System.out.println("-----------------------------------------------------------------------------");
+        System.out.println("|                                 Card List                                 |");
+        System.out.println("-----------------------------------------------------------------------------");
+        System.out.printf("| %-4s | %-20s | %-12s | %-8s | %-17s |%n", "Id", "CardNumber", "ExpiredDate", "Status", "CreatedDate");
+        System.out.println("-----------------------------------------------------------------------------");
+
+        list.forEach(cardDTO -> {
+            String cardNumber = CardUtil.replaceWithStar(cardDTO.getCardNumber());
+            String expDate = DateUtil.toMonthAndYear(cardDTO.getExpDate());
+            String createdDate = DateUtil.toSimpleFormat(cardDTO.getCreatedDate());
+
+            System.out.printf("| %-4d | %-20s | %-12s | %-8s | %-17s |%n",
+                    cardDTO.getId(), cardNumber, expDate, cardDTO.getStatus(), createdDate);
+        });
+        System.out.println("-----------------------------------------------------------------------------");
+    }
+
+    public void adminUpdateCard(String cardNumber, String expiredDate) {
+        CardDTO cardByNumber = cardRepository.getCardByNumber(cardNumber);
+        if (cardByNumber == null) {
+            System.out.println("card not found");
+            return;
+        }
+
+        LocalDate newExpDate = getCardExpDate(expiredDate);
+        if (newExpDate == null) {
+            System.out.println("wrong exp date");
+            return;
+        }
+
+        if (cardRepository.updateCard(cardNumber, newExpDate) == 1) {
+            System.out.println("successfully updated");
+        } else {
+            System.out.println("error");
+        }
+    }
+
+    private LocalDate getCardExpDate(String expiredDate) {
+        try {
+            int month = Integer.parseInt(expiredDate.substring(0, 2));
+            int year = 2000 + Integer.parseInt(expiredDate.substring(3));
+            return LocalDate.of(year, month, 1);
+        } catch (RuntimeException e) {
+            System.out.println("Card expired date is wrong");
+        }
+        return null;
+    }
+
+    public void changeCardStatus(String cardNumber) {
+        CardDTO cardByNumber = cardRepository.getCardByNumber(cardNumber);
+        if (cardByNumber == null) {
+            System.out.println("card not found");
+            return;
+        }
+
+        if (cardByNumber.getStatus().equals(GeneralStatus.ACTIVE)) {
+            cardRepository.changeCardStatus(cardNumber, GeneralStatus.BLOCK);
+            System.out.println("card blocked");
+        } else {
+            cardRepository.changeCardStatus(cardNumber, GeneralStatus.ACTIVE);
+            System.out.println("card activated");
+        }
+    }
+
+    public void deleteCard(String cardNumber) {
+        CardDTO cardByNumber = cardRepository.getCardByNumber(cardNumber);
+        if (cardByNumber == null) {
+            System.out.println("card not found");
+            return;
+        }
+
+        if (!cardByNumber.isVisible()) {
+            System.out.println("card already deleted");
+            return;
+        }
+
+        if (cardRepository.deleteCard(cardNumber) == 1) {
+            System.out.println("card deleted");
+        }
+    }
+}

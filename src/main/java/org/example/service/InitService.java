@@ -33,4 +33,22 @@ public class InitService {
         profile.setRole(ProfileRole.ADMIN);
         profileRepository.create(profile);
     }
+
+    public void initUser() {
+        String phone = "998911234568";
+        ProfileDTO existsUser = profileRepository.getByPhone(phone);
+        if (existsUser != null) {
+            return;
+        }
+        ProfileDTO profile = new ProfileDTO();
+        profile.setName("StudentJon");
+        profile.setSurname("Studentov");
+        profile.setPhone(phone);
+        profile.setPswd(MD5Util.getMd5Hash("12345"));
+        profile.setCreatedDate(LocalDateTime.now());
+        profile.setVisible(true);
+        profile.setStatus(ProfileStatus.ACTIVE);
+        profile.setRole(ProfileRole.USER);
+        profileRepository.create(profile);
+    }
 }

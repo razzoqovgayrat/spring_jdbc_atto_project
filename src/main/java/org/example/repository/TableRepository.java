@@ -22,6 +22,30 @@ public class TableRepository {
                     status varchar (20) not null,
                     role varchar not null
                 )""";
+
+        String cardSql = """
+                create table if not exists card (
+                    id serial primary key,
+                    card_number varchar (16) unique,
+                    exp_date date not null,
+                    balance numeric not null,
+                    status varchar (20) not null,
+                    visible bool default true,
+                    created_date timestamp not null default now()
+                )""";
+
+        String terminalSql = """
+                create table if not exists terminal (
+                    id serial primary key,
+                    code varchar unique not null,
+                    address varchar,
+                    status varchar,
+                    visible boolean default true,
+                    created_date timestamp default now()
+                )""";
+
         jdbcTemplate.execute(profileSql);
+        jdbcTemplate.execute(cardSql);
+        jdbcTemplate.execute(terminalSql);
     }
 }
