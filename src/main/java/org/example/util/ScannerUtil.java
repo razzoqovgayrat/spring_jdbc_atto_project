@@ -28,14 +28,15 @@ public class ScannerUtil {
     }
 
     public static double getDouble(String text) {
-        double n = -1;
-        try {
-            System.out.print(text + ": ");
-            n = scannerNum.nextDouble();
-        } catch (InputMismatchException e) {
-            scannerNum = new Scanner(System.in);
+        while (true) {
+            try {
+                System.out.print(text + ": ");
+                return scannerNum.nextDouble();
+            } catch (InputMismatchException e) {
+                System.out.println("Mazgi to'g'ri narsa kirit");
+                scannerNum = new Scanner(System.in);
+            }
         }
-        return n;
     }
 
     public static String getStr(String text) {

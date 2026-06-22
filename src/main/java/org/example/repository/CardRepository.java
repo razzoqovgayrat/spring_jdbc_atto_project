@@ -25,14 +25,13 @@ public class CardRepository {
     }
 
     public int save(CardDTO cardDTO) {
-        String sql = "insert into card(card_number, exp_date, balance, status, created_date) values (?, ?, ?, ?, ?)";
+        String sql = "insert into card(card_number, exp_date, balance, status) values (?, ?, ?, ?)";
 
         PreparedStatementSetter preparedStatementSetter = ps -> {
             ps.setString(1, cardDTO.getCardNumber());
             ps.setDate(2, Date.valueOf(cardDTO.getExpDate()));
             ps.setDouble(3, cardDTO.getBalance());
             ps.setString(4, cardDTO.getStatus().toString());
-            ps.setTimestamp(5, Timestamp.valueOf(cardDTO.getCreatedDate()));
         };
 
         return jdbcTemplate.update(sql, preparedStatementSetter);
@@ -50,11 +49,26 @@ public class CardRepository {
 
     public void changeCardStatus(String cardNumber, GeneralStatus generalStatus) {
         String sql = "update card set status = ? where card_number = ?";
-        jdbcTemplate.update(sql, generalStatus.name(), cardNumber);
+        jdbcTemplate.update(sql, generalStatus.toString(), cardNumber);
     }
 
     public int deleteCard(String cardNumber) {
         String sql = "update card set visible = false where card_number = ?";
         return jdbcTemplate.update(sql, cardNumber);
+    }
+
+    public int updateCardBalance(String cardNumber, double balance) {
+        String sql = "update card set balance = ? where card_number = ?";
+        return jdbcTemplate.update(sql, balance, cardNumber);
+    }
+
+    public int cardDebit(String cardNumber, double amount) {
+        String sql = "update card set balance = balance + ? where card_number = ?";
+        return jdbcTemplate.update(sql, amount, cardNumber);
+    }
+
+    public int cardCredit(String cardNumber, double amount) {
+        String sql = "update card set balance = balance - ? where card_number = ?";
+        return jdbcTemplate.update(sql, amount, cardNumber);
     }
 }

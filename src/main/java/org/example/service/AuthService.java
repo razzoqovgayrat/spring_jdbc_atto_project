@@ -1,5 +1,6 @@
 package org.example.service;
 
+import org.example.container.ComponentContainer;
 import org.example.controller.AdminController;
 import org.example.controller.UserController;
 import org.example.dto.ProfileDTO;
@@ -21,31 +22,33 @@ public class AuthService {
     private AdminController adminController;
     @Autowired
     private UserController userController;
+    @Autowired
+    private ComponentContainer container;
 
     public void login(String phone, String pswd) {
-        ProfileDTO isFound = profileRepository.getByPhone(phone);
-        if (isFound == null) {
+        ProfileDTO profileDTO = profileRepository.getByPhone(phone);
+        if (profileDTO == null) {
             System.out.println("phone or password wrong ");
             return;
         }
 
-        if (!isFound.getPswd().equals(MD5Util.getMd5Hash(pswd))) {
+        if (!profileDTO.getPswd().equals(MD5Util.getMd5Hash(pswd))) {
             System.out.println("phone or password wrong ");
             return;
         }
 
-        if (!isFound.getStatus().equals(ProfileStatus.ACTIVE)) {
+        if (!profileDTO.getStatus().equals(ProfileStatus.ACTIVE)) {
             System.out.println("profile in wrong status");
             return;
         }
 
         System.out.println("\n----- Welcome to the atto system -----\n");
-        if (isFound.getRole().equals(ProfileRole.ADMIN)) {
+        container.setCurrentProfile(profileDTO);
+        if (profileDTO.getRole().equals(ProfileRole.ADMIN)) {
             adminController.start();
-        } else if (isFound.getRole().equals(ProfileRole.USER)) {
+        } else if (profileDTO.getRole().equals(ProfileRole.USER)) {
             userController.start();
         }
-
     }
 
     public void registration(ProfileDTO profile) {

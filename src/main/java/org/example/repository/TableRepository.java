@@ -28,7 +28,7 @@ public class TableRepository {
                     id serial primary key,
                     card_number varchar (16) unique,
                     exp_date date not null,
-                    balance numeric not null,
+                    balance numeric not null check(balance >= 0),
                     status varchar (20) not null,
                     visible bool default true,
                     created_date timestamp not null default now()
@@ -44,8 +44,32 @@ public class TableRepository {
                     created_date timestamp default now()
                 )""";
 
+        String profileCardSql = """
+                create table if not exists profile_card (
+                    id serial primary key,
+                    card_id int not null,
+                    profile_id int not null,
+                    visible boolean default true,
+                    created_date timestamp default now(),
+                    foreign key(card_id) references card(id),
+                    foreign key(profile_id) references profile(id)
+                )""";
+
+        String transactionSql = """
+                create table if not exists transactions (
+                    id serial primary key,
+                    card_id int not null,
+                    amount numeric(12, 2),
+                    terminal_id int,
+                    type varchar(15),
+                    created_date timestamp default now(),
+                    foreign key(card_id) references card(id)
+                )""";
+
         jdbcTemplate.execute(profileSql);
         jdbcTemplate.execute(cardSql);
         jdbcTemplate.execute(terminalSql);
+        jdbcTemplate.execute(profileCardSql);
+        jdbcTemplate.execute(transactionSql);
     }
 }

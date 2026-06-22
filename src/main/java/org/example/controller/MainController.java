@@ -3,7 +3,9 @@ package org.example.controller;
 import org.example.dto.ProfileDTO;
 import org.example.repository.TableRepository;
 import org.example.service.AuthService;
+import org.example.service.CardService;
 import org.example.service.InitService;
+import org.example.service.TransactionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 
@@ -19,11 +21,14 @@ public class MainController {
     private AuthService authService;
     @Autowired
     TableRepository tableRepository;
+    @Autowired
+    private TransactionService transactionService;
 
     public void start() {
         tableRepository.createTables();
         initService.initAdmin();
         initService.initUser();
+        initService.initCompanyCard();
 
         while (true) {
             System.out.println("""
@@ -35,7 +40,7 @@ public class MainController {
             switch (getInt("choose one")) {
                 case 1 -> login();
                 case 2 -> registration();
-                case 3 -> {}
+                case 3 -> payment();
                 case 0 -> {return;}
                 default -> System.out.println("wrong input");
             }
@@ -61,5 +66,11 @@ public class MainController {
         profile.setPswd(pswd);
 
         authService.registration(profile);
+    }
+
+    private void payment() {
+        String cardNumber = getStr("Enter card number");
+        String terminalCode = getStr("Enter terminal code");
+        transactionService.makePayment(cardNumber, terminalCode);
     }
 }
