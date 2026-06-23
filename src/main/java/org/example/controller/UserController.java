@@ -62,7 +62,8 @@ public class UserController {
     }
 
     private void deleteCard() {
-
+        String cardNumber = getStr("Enter card number");
+        cardService.deleteProfileCard(cardNumber);
     }
 
     private void refill() {

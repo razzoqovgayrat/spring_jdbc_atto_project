@@ -15,6 +15,7 @@ public class ProfileDTO {
     private String surname;
     private String phone;
     private String pswd;
+    private int cardCount;
     private LocalDateTime createdDate;
     private boolean visible;
     private ProfileStatus status;

@@ -50,4 +50,9 @@ public class ProfileCardRepository {
 
         return jdbcTemplate.query(sql, rowMapper, profileId);
     }
+
+    public int deleteProfileCardById(int profileCardId) {
+        String sql = "update profile_card set visible = false where id = ?";
+        return jdbcTemplate.update(sql, profileCardId);
+    }
 }

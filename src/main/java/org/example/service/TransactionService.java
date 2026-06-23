@@ -15,7 +15,7 @@ import org.example.util.TotalFaire;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 import java.util.List;
 
 @Service
@@ -104,5 +104,76 @@ public class TransactionService {
             System.out.printf("| %-20s | %-25s | %-15s | %-18s | %-8s |%n", cardNumber, address, amount, createdDate, transactionType);
         });
         System.out.println("------------------------------------------------------------------------------------------------------");
+    }
+
+    public void adminTransactionList() {
+        List<TransactionDetailDTO> list = transactionRepository.getAll();
+        if (list.isEmpty()) return;
+        System.out.println("--------------------------------------------------------------------------------------------------------------------------------------------------");
+        System.out.println("|                                                               Transaction List                                                                 |");
+        System.out.println("--------------------------------------------------------------------------------------------------------------------------------------------------");
+        System.out.printf("| %-20s | %-10s | %-15s | %-16s | %-25s | %-9s | %-18s | %-8s |%n", "CardNumber", "Name", "Surname", "TerminalCode", "Address", "Amount", "TransactionDate", "Type");
+        System.out.println("--------------------------------------------------------------------------------------------------------------------------------------------------");
+        list.forEach(dto -> {
+            String cardNumber = CardUtil.replaceWithStar(dto.getCard().getCardNumber());
+            String name = dto.getProfile().getName();
+            String surname = dto.getProfile().getSurname();
+            String terminalCode = dto.getTerminal().getCode();
+            String address = dto.getTerminal().getAddress();
+            double amount = dto.getTransaction().getAmount();
+            String transactionDate = DateUtil.toSimpleFormat(dto.getTransaction().getCreatedDate());
+            String type = dto.getTransaction().getTransactionType().toString();
+
+            System.out.printf("| %-20s | %-10s | %-15s | %-16s | %-25s | %-9s | %-18s | %-8s |%n",
+                    cardNumber, name, surname, terminalCode, address, amount, transactionDate, type);
+        });
+        System.out.println("--------------------------------------------------------------------------------------------------------------------------------------------------");
+    }
+
+    public void paymentByDate(LocalDate date) {
+        List<TransactionDetailDTO> transactionList = transactionRepository.paymentByDate(date);
+        printTransaction(transactionList);
+    }
+
+    private void printTransaction(List<TransactionDetailDTO> transactionList) {
+        if (transactionList.isEmpty()) return;
+        System.out.println("-------------------------------------------------------------------------------------------------");
+        System.out.println("|                                      Transaction List                                         |");
+        System.out.println("-------------------------------------------------------------------------------------------------");
+        System.out.printf("| %-20s | %-25s | %-10s | %-18s | %-8s |%n", "CardNumber", "Address", "Amount", "TransactionDate", "Type");
+        System.out.println("-------------------------------------------------------------------------------------------------");
+        transactionList.forEach(transactionDetailDTO -> {
+            String cardNumber = CardUtil.replaceWithStar(transactionDetailDTO.getCard().getCardNumber());
+            String address = transactionDetailDTO.getTerminal().getAddress();
+            TransactionDTO transaction = transactionDetailDTO.getTransaction();
+
+            System.out.printf("| %-20s | %-25s | %-10s | %-18s | %-8s |%n", cardNumber, address, transaction.getAmount(),
+                    DateUtil.toSimpleFormat(transaction.getCreatedDate()), transaction.getTransactionType());
+        });
+        System.out.println("-------------------------------------------------------------------------------------------------");
+
+    }
+
+    public void transactionBetweenDays(String fromDateStr, String toDateStr) {
+        LocalDate fromDate = LocalDate.parse(fromDateStr);
+        LocalDate toDate = LocalDate.parse(toDateStr);
+
+        List<TransactionDetailDTO> transactionList = transactionRepository.transactionBetweenDays(fromDate, toDate);
+        printTransaction(transactionList);
+    }
+
+    public void transactionByTerminalCode(String code) {
+        List<TransactionDetailDTO> transactionList = transactionRepository.transactionByTerminalCode(code);
+        printTransaction(transactionList);
+    }
+
+    public void transactionListByCard(String cardNumber) {
+        CardDTO cardByNumber = cardRepository.getCardByNumber(cardNumber);
+        if (cardByNumber == null) {
+            System.out.println("Card not found");
+            return;
+        }
+        List<TransactionDetailDTO> transactionList = transactionRepository.transactionListByCardId(cardByNumber.getId());
+        printTransaction(transactionList);
     }
 }

@@ -1,6 +1,8 @@
 package org.example.repository;
 
 import org.example.dto.ProfileDTO;
+import org.example.enums.GeneralStatus;
+import org.example.enums.ProfileStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -39,5 +41,18 @@ public class ProfileRepository {
         List<ProfileDTO> list = jdbcTemplate.query(sql, new BeanPropertyRowMapper<>(ProfileDTO.class), phone);
         if (!list.isEmpty()) return list.getFirst();
         return null;
+    }
+
+    public List<ProfileDTO> profileList() {
+        String sql = "select p.id, p.name, p.surname, p.phone, " +
+                "(select count(*) from profile_card where profile_id = p.id) as cardCount, " +
+                "p.status, p.created_date " +
+                "from profile as p";
+        return jdbcTemplate.query(sql, new BeanPropertyRowMapper<>(ProfileDTO.class));
+    }
+
+    public int changeProfileStatus(int id, ProfileStatus profileStatus) {
+        String sql = "update profile set status = ? where id = ?";
+        return jdbcTemplate.update(sql, profileStatus.toString(), id);
     }
 }

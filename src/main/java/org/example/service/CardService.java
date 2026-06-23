@@ -236,6 +236,15 @@ public class CardService {
         transactionService.createTransaction(cardByNumber.getId(), null, amount, TransactionType.REFILL);
     }
 
+    public void cardBalance(String companyCard) {
+        CardDTO cardByNumber = cardRepository.getCardByNumber(companyCard);
+        if (cardByNumber == null) {
+            System.out.println("card not found");
+            return;
+        }
+        System.out.println("Card Balance: " + cardByNumber.getBalance());
+    }
+
     private boolean isValidCardNumber(String cardNumber) {
         if (cardNumber == null || cardNumber.isBlank() || cardNumber.length() != 16) {
             return false;
@@ -245,5 +254,31 @@ public class CardService {
                 return false;
         }
         return true;
+    }
+
+    public void deleteProfileCard(String cardNumber) {
+        CardDTO cardByNumber = cardRepository.getCardByNumber(cardNumber);
+        if (cardByNumber == null) {
+            System.out.println("card not found");
+            return;
+        }
+
+        if (!cardByNumber.isVisible()) {
+            System.out.println("card already deleted");
+            return;
+        }
+
+        ProfileCardDTO profileCardByCardId = profileCardRepository.getProfileCardByCardId(cardByNumber.getId());
+        if (profileCardByCardId == null) {
+            System.out.println("profile card not found");
+            return;
+        }
+
+        if (profileCardRepository.deleteProfileCardById(profileCardByCardId.getId()) == 1) {
+            System.out.println("profile card deleted");
+        } else {
+            System.out.println("error");
+        }
+
     }
 }

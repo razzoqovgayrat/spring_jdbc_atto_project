@@ -11,10 +11,12 @@ public class Main {
         MainController mainController = context.getBean("mainController", MainController.class);
         mainController.start();
 
+
         // 998911234567 - admin
         // 998911234568 - user
 
-        // began 9:30; break 1:30; begun 2:10 end 4:40
-        // began 10:20; end 12:00; begun 1:37 end 7:04
+        // began 9:30 break 1:30; begun 2:10 end 4:40
+        // began 10:20 end 12:00; begun 1:37 end 7:04
+        // began 9:00 end 12:00; began 1:30 end 6:00;
     }
 }

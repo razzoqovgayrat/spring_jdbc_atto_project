@@ -1,9 +1,14 @@
 package org.example.controller;
 
 import org.example.service.CardService;
+import org.example.service.ProfileService;
 import org.example.service.TerminalService;
+import org.example.service.TransactionService;
+import org.example.util.CardUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+
+import java.time.LocalDate;
 
 import static org.example.util.ScannerUtil.getInt;
 import static org.example.util.ScannerUtil.getStr;
@@ -14,6 +19,10 @@ public class AdminController {
     private CardService cardService;
     @Autowired
     private TerminalService terminalService;
+    @Autowired
+    private ProfileService profileService;
+    @Autowired
+    private TransactionService transactionService;
 
     public void start() {
         while (true) {
@@ -29,15 +38,15 @@ public class AdminController {
                 case 8 -> updateTerminal();
                 case 9 -> changeTerminalStatus();
                 case 10 -> deleteTerminal();
-                case 11 -> {}
-                case 12 -> {}
-                case 13 -> {}
-                case 14 -> {}
-                case 15 -> {}
-                case 16 -> {}
-                case 17 -> {}
-                case 18 -> {}
-                case 19 -> {}
+                case 11 -> profileService.profileList();
+                case 12 -> changeProfileStatus();
+                case 13 -> transactionService.adminTransactionList();
+                case 14 -> cardService.cardBalance(CardUtil.companyCard);
+                case 15 -> transactionService.paymentByDate(LocalDate.now());
+                case 16 -> transactionByDay();
+                case 17 -> transactionBetweenDays();
+                case 18 -> transactionListByTerminal();
+                case 19 -> transactionListByCard();
                 case 0 -> {return;}
                 default -> System.out.println("wrong unput. Mazgi");
             }
@@ -65,7 +74,7 @@ public class AdminController {
                 16. Kunlik to'lovlar
                 17. Oraliq to'lovlar
                 18. Transaction by Terminal
-                19. Transaction by Car
+                19. Transaction by Card
                 0. Exit""");
     }
 
@@ -111,5 +120,31 @@ public class AdminController {
     private void deleteTerminal() {
         String code = getStr("code");
         terminalService.deleteTerminal(code);
+    }
+
+    private void changeProfileStatus() {
+        String phone = getStr("Enter profile phone");
+        profileService.changeProfileStatus(phone);
+    }
+
+    private void transactionByDay() {
+        String date = getStr("Enter (yyyy-MM-dd) date");
+        transactionService.paymentByDate(LocalDate.parse(date));
+    }
+
+    private void transactionBetweenDays() {
+        String fromDate = getStr("Enter (yyyy-MM-dd) from date");
+        String toDate = getStr("Enter (yyyy-MM-dd) to date");
+        transactionService.transactionBetweenDays(fromDate, toDate);
+    }
+
+    private void transactionListByTerminal() {
+        String code = getStr("Enter terminal code");
+        transactionService.transactionByTerminalCode(code);
+    }
+
+    private void transactionListByCard() {
+        String cardNumber = getStr("Enter card number");
+        transactionService.transactionListByCard(cardNumber);
     }
 }
