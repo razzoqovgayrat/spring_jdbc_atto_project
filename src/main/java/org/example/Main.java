@@ -14,6 +14,7 @@ public class Main {
 
         // 998911234567 - admin
         // 998911234568 - user
+        // password - 12345
 
         // began 9:30 break 1:30; begun 2:10 end 4:40
         // began 10:20 end 12:00; begun 1:37 end 7:04
